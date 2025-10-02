@@ -27,11 +27,13 @@ html, body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scrollbar */
 }
 
 #root {
   /* Ensure the React root fills the viewport so content can expand */
   min-height: 100vh;
+  max-width: 100vw; /* Avoid overflow beyond viewport width */
 }
 
 h1 {

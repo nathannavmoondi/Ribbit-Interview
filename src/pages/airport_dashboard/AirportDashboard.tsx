@@ -7,7 +7,7 @@
  *  - Prepares for future selection syncing by centralizing derived state here
  */
 import { useEffect, useMemo, useState } from 'react';
-import planeImg from 'assets/plane.jpg';
+import planeImg from 'assets/plane.png';
 import { AirportMap } from './map/AirportMap';
 import AirportList from './AirportList';
 import { mockAirports } from 'data/MockAirports';
@@ -41,39 +41,37 @@ export function AirportDashboard() {
   }, []);
 
   // Use branded plane image from assets
-  const planeUrl = `url(${planeImg})`;
 
   return (
     <SelectionProvider>
-      <div style={{ padding: '20px' }}>
+      <div style={{ padding: '16px', position: 'relative', zIndex: 1 }}>
+        {/* Fixed decorative airplane at bottom-left of the viewport */}
+        <div style={{
+          position: 'fixed',
+          left: 8,
+          bottom: 8,
+          /* Twice as big as before, with clamps to avoid overflow on very small screens */
+          width: 'min(72vh, 45vw)',
+          height: 'calc(min(72vh, 45vw) * 0.6)',
+          backgroundImage: `url(${planeImg})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'left bottom',
+          backgroundSize: 'contain',
+          opacity: 0.28,
+          mixBlendMode: 'multiply',
+          filter: 'grayscale(100%) contrast(1.02) brightness(1.02)',
+          pointerEvents: 'none',
+          zIndex: 3
+        }} />
         <div style={{
           position: 'relative',
           overflow: 'hidden',
           borderRadius: 14,
-          padding: 22,
+          padding: 18,
           background: 'linear-gradient(145deg, #163a6b 0%, #122e58 55%, #102748 100%)',
           boxShadow: '0 12px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
           border: '1px solid rgba(30, 80, 160, 0.45)'
         }}>
-          {/* Decorative airplane overlay */}
-          <div style={{
-            position: 'absolute',
-            bottom: -28,
-            left: -28,
-            width: 680,
-            height: 460,
-            backgroundImage: planeUrl as unknown as string,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'left bottom',
-            backgroundSize: 'contain',
-            opacity: 0.28,
-            mixBlendMode: 'multiply',
-            filter: 'grayscale(100%) contrast(1.02) brightness(1.02)',
-            transform: 'rotate(6deg)',
-            transformOrigin: 'left bottom',
-            pointerEvents: 'none'
-          }} />
-
           {/* Header inside the panel */}
           <h1 style={{
             margin: '2px 4px 16px',

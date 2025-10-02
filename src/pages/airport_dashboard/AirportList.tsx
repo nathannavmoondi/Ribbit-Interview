@@ -36,7 +36,7 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
             const selected = a.id === selectedAirportId;
             const hovered = hoverId === a.id;
             // Stronger zebra contrast for dark theme
-            const zebra = idx % 2 === 0 ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)';
+            const zebra = idx % 2 === 0 ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.04)';
             const baseStyle: React.CSSProperties = { background: zebra, cursor: 'pointer', transition: 'background 120ms ease, box-shadow 120ms ease' };
             const hoverStyle: React.CSSProperties = hovered && !selected ? { background: 'rgba(100,108,255,0.22)', boxShadow: 'inset 0 0 0 1px rgba(100,108,255,0.25)' } : {};
             const selectedStyle: React.CSSProperties = selected ? { background: 'rgba(100,108,255,0.28)', outline: '2px solid #646cff', boxShadow: 'inset 0 0 0 2px rgba(100,108,255,0.25)', fontWeight: 600, borderLeft: '4px solid #646cff' } : {};
