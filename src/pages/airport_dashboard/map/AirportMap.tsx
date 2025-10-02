@@ -18,11 +18,13 @@ import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { fromLonLat, transformExtent } from 'ol/proj';
 import { Style, Circle, Fill, Stroke, Text } from 'ol/style';
+import Icon from 'ol/style/Icon';
 import { Overlay } from 'ol';
 import 'ol/ol.css';
 
 //our imports
 import { type Airport, type MapBounds } from 'types';
+import { useSelection } from '../../../context/SelectionContext';
 
 //what needs to be passed in to this componentn
 interface AirportMapProps {
@@ -38,12 +40,14 @@ export const AirportMap: React.FC<AirportMapProps> = ({
   airports, //destruct
   onBoundsChange,
 }) => {
+  const { selectedAirportId, setSelectedAirportId } = useSelection();
 
   //all our refs
   const mapRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<Map | null>(null);
   const vectorSourceRef = useRef<VectorSource | null>(null);
+  const pinSourceRef = useRef<VectorSource | null>(null);
   const overlayRef = useRef<Overlay | null>(null);
   
   const [hoveredAirport, setHoveredAirport] = useState<Airport | null>(null);
@@ -68,6 +72,14 @@ export const AirportMap: React.FC<AirportMapProps> = ({
       style: createAirportStyle,
     });
 
+    // Create vector layer for the selected pin (drawn above markers)
+    const pinSource = new VectorSource();
+    pinSourceRef.current = pinSource;
+    const pinLayer = new VectorLayer({
+      source: pinSource,
+      zIndex: 1000, //on top of everything
+    });
+
     // Create overlay for hover popup
     const overlay = new Overlay({
       element: popupRef.current,
@@ -85,6 +97,7 @@ export const AirportMap: React.FC<AirportMapProps> = ({
           source: new OSM(),
         }),
         vectorLayer,
+        pinLayer,
       ],
       view: new View({
         center: fromLonLat([-98.35, 39.5]), // Center of US
@@ -93,7 +106,7 @@ export const AirportMap: React.FC<AirportMapProps> = ({
       overlays: [overlay],
     });
 
-    // Handle mouse hover events
+  // Handle mouse hover events
     map.on('pointermove', (evt) => {
       const pixel = map.getEventPixel(evt.originalEvent);
       const feature = map.forEachFeatureAtPixel(pixel, (feature) => feature, {
@@ -109,6 +122,15 @@ export const AirportMap: React.FC<AirportMapProps> = ({
         setHoveredAirport(null);
         overlay.setPosition(undefined);
         map.getTargetElement().style.cursor = '';
+      }
+    });
+
+    // Handle click selection
+    map.on('singleclick', (evt) => {
+      const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
+      if (feature) {
+        const airport = feature.get('airport') as Airport;
+        setSelectedAirportId((prev) => (prev === airport.id ? null : airport.id));
       }
     });
 
@@ -165,7 +187,55 @@ export const AirportMap: React.FC<AirportMapProps> = ({
     });
   }, [airports]);
 
-  // TODO: Handle external selection changes
+  // Update red pin feature whenever selection changes
+  useEffect(() => {
+    const pinSource = pinSourceRef.current;
+    if (!pinSource) return;
+    pinSource.clear();
+    if (!selectedAirportId) return;
+    const selected = airports.find(a => a.id === selectedAirportId);
+    if (!selected) return;
+    const feature = new Feature({
+      geometry: new Point(fromLonLat([
+        selected.coordinates.longitude,
+        selected.coordinates.latitude
+      ])),
+    });
+    feature.setStyle(createRedPinStyle());
+    pinSource.addFeature(feature);
+  }, [selectedAirportId, airports]);
+
+  // Handle external selection changes (update feature styles)
+  useEffect(() => {
+    const vectorSource = vectorSourceRef.current;
+    if (!vectorSource) return;
+    vectorSource.getFeatures().forEach((f) => {
+      const airport = f.get('airport') as Airport | undefined;
+      if (!airport) return;
+      const isSelected = airport.id === selectedAirportId;
+
+      if (isSelected) {
+        // Selected: larger dot with dual stroke (gold outer + white inner) and bolder label
+        f.setStyle(new Style({
+          image: new Circle({
+            radius: 11,
+            fill: new Fill({ color: getTypeColor(airport.type) }),
+            stroke: new Stroke({ color: '#FFD700', width: 4 }),
+          }),
+          text: new Text({
+            text: airport.code,
+            font: 'bold 13px sans-serif',
+            fill: new Fill({ color: '#000' }),
+            stroke: new Stroke({ color: '#fff', width: 3 }),
+            offsetY: -22,
+          }),
+        }));
+      } else {
+        // Default style
+        f.setStyle(createAirportStyle(f));
+      }
+    });
+  }, [selectedAirportId]);
   // TODO: Implement zoom/bounds filtering logic
 
   //all our useeffects are done.  Now we render the map and popup
@@ -315,6 +385,22 @@ const createAirportStyle = (feature: any) => {
     }),
   });
 };
+
+// Create a Google-style red pin using an inline SVG Icon
+function createRedPinStyle(): Style {
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'>
+    <path d='M12 2c-3.3 0-6 2.6-6 5.9 0 4.4 6 12.1 6 12.1s6-7.7 6-12.1C18 4.6 15.3 2 12 2z' fill='#E53935' stroke='#B71C1C' stroke-width='1.2'/>
+    <circle cx='12' cy='8.5' r='2.6' fill='#ffffff'/>
+  </svg>`;
+  const src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  return new Style({
+    image: new Icon({
+      src,
+      anchor: [0.5, 1],
+    }),
+  });
+}
 
 // TODO: Implement selected airport style
 // const createSelectedAirportStyle = (feature: Feature) => { ... };
