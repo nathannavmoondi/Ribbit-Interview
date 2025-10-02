@@ -12,6 +12,7 @@ interface AirportListProps {
   airports: Airport[];
 }
 
+//we get passed in visible airports form the dashboard. Which is reclaculated when map bounds change
 export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
   return (
     <div style={{ border: '1px solid #ccc', padding: '12px', borderRadius: 4, height: 500, overflow: 'auto' }}>
@@ -46,6 +47,7 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
   );
 };
 
+// nice way of putting all this css here instead of a file, inline or styled components
 const th: React.CSSProperties = { textAlign: 'left', padding: '8px 6px', borderBottom: '1px solid #ddd', position: 'sticky', top: 0, background: '#1f1f1f' };
 const td: React.CSSProperties = { padding: '8px 6px', borderBottom: '1px solid #2a2a2a' };
 const tdCap: React.CSSProperties = { ...td, textTransform: 'capitalize' };

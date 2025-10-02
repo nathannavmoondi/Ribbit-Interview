@@ -18,6 +18,9 @@ export function AirportDashboard() {
   const [bounds, setBounds] = useState<MapBounds | null>(null);
 
   // Compute airports within current map bounds
+  // refresher: usememo caches the result of a computation (here, filtering airports)
+  // and only recomputes it when its dependencies change (here, airports or bounds).
+  // This avoids unnecessary recalculations on every render, improving performance.
   const visibleAirports = useMemo(() => {
     if (!bounds) return airports;
     const { north, south, east, west } = bounds;
@@ -35,10 +38,13 @@ export function AirportDashboard() {
       <h1>Airport Dashboard</h1>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
         <div>
+          {/*  When map changes (pan/zoom) call onboundchange handler, recalculate visible*/}
           <AirportMap airports={airports} onBoundsChange={setBounds} />
         </div>
         <div>
-          <AirportList airports={visibleAirports} />
+          {/* airportmap component above changes bounds, recalculate visible airports in handler and then pass it in! */}
+          <AirportList airports={visibleAirports} /> 
+       
         </div>
       </div>
     </div>
