@@ -1,3 +1,10 @@
+/**
+ * File: AirportList.tsx
+ * Purpose: Plain HTML table that displays a list of airports and their attributes.
+ * How it works:
+ *  - Receives airports as props and renders a scrollable table with sticky header
+ *  - Designed to be fed by the dashboard's filtered (visible) airports
+ */
 import React from 'react';
 import { type Airport } from 'types';
 

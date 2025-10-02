@@ -1,3 +1,13 @@
+/**
+ * File: AirportMap.tsx
+ * Purpose: Map component using OpenLayers to render airports as vector point features on
+ *          top of an OSM tile basemap.
+ * How it works:
+ *  - Builds an OL Map with a TileLayer (OSM) and a VectorLayer for airport markers
+ *  - Converts airport coordinates from lon/lat to map projection using fromLonLat
+ *  - Styles markers by airport type and shows IATA code labels
+ *  - Emits onBoundsChange(bounds) when the map view changes so the parent can filter the table
+ */
 import React, { useEffect, useRef, useState } from 'react';
 import { Map, View } from 'ol';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';

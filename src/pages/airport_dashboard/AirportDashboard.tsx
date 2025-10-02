@@ -1,3 +1,11 @@
+/**
+ * File: AirportDashboard.tsx
+ * Purpose: Main dashboard view containing the map (left) and table (right).
+ * How it works:
+ *  - Holds map viewport bounds in state and uses them to filter airports
+ *  - Passes the full airport list to the map and the filtered list to the table
+ *  - Prepares for future selection syncing by centralizing derived state here
+ */
 import { useMemo, useState } from 'react';
 import { AirportMap } from './map/AirportMap';
 import AirportList from './AirportList';
