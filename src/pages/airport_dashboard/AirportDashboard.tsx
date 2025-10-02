@@ -7,6 +7,7 @@
  *  - Prepares for future selection syncing by centralizing derived state here
  */
 import { useEffect, useMemo, useState } from 'react';
+import planeImg from 'assets/plane.jpg';
 import { AirportMap } from './map/AirportMap';
 import AirportList from './AirportList';
 import { mockAirports } from 'data/MockAirports';
@@ -39,24 +40,8 @@ export function AirportDashboard() {
     document.title = 'Ribbit Dashboard (Nathan Moondi DEMO)';
   }, []);
 
-  // Detailed airplane silhouette as a decorative background (data URL encoded)
-  // Stylized jet with fuselage, wings, and tail for a clearer plane look
-  const planeSvg = `
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
-    <g fill='white'>
-      <!-- Fuselage -->
-      <path d='M40 248 L300 248 Q360 246 420 232 Q452 224 468 224 Q492 224 500 236 Q504 242 504 256 Q504 270 500 276 Q492 288 468 288 Q452 288 420 280 Q360 266 300 264 L40 264 Q28 264 24 260 Q20 256 24 252 Q28 248 40 248 Z'/>
-      <!-- Main wings -->
-      <path d='M176 200 L360 240 L360 272 L176 312 Q168 314 164 312 Q160 310 160 304 L160 208 Q160 202 164 200 Q168 198 176 200 Z'/>
-      <!-- Tail boom -->
-      <path d='M64 232 L120 232 L120 280 L64 280 Q56 280 52 276 Q48 272 48 256 Q48 240 52 236 Q56 232 64 232 Z'/>
-      <!-- Tail wings -->
-      <path d='M72 212 L152 240 L152 272 L72 300 Q64 302 60 300 Q56 298 56 292 L56 220 Q56 214 60 212 Q64 210 72 212 Z'/>
-      <!-- Cockpit cone -->
-      <path d='M420 232 Q448 244 468 256 Q448 268 420 280 Q426 266 426 256 Q426 246 420 232 Z'/>
-    </g>
-  </svg>`;
-  const planeUrl = `url("data:image/svg+xml,${encodeURIComponent(planeSvg)}")`;
+  // Use branded plane image from assets
+  const planeUrl = `url(${planeImg})`;
 
   return (
     <SelectionProvider>
@@ -74,18 +59,18 @@ export function AirportDashboard() {
           <div style={{
             position: 'absolute',
             bottom: -28,
-            right: -28,
+            left: -28,
             width: 680,
             height: 460,
             backgroundImage: planeUrl as unknown as string,
             backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right bottom',
+            backgroundPosition: 'left bottom',
             backgroundSize: 'contain',
-            opacity: 0.26,
-            mixBlendMode: 'soft-light',
-            filter: 'grayscale(100%)',
-            transform: 'rotate(-6deg)',
-            transformOrigin: 'right bottom',
+            opacity: 0.28,
+            mixBlendMode: 'multiply',
+            filter: 'grayscale(100%) contrast(1.02) brightness(1.02)',
+            transform: 'rotate(6deg)',
+            transformOrigin: 'left bottom',
             pointerEvents: 'none'
           }} />
 
