@@ -1,27 +1,45 @@
+/**
+ * File: AirportMap.tsx
+ * Purpose: Map component using OpenLayers to render airports as vector point features on
+ *          top of an OSM tile basemap.
+ * How it works:
+ *  - Builds an OL Map with a TileLayer (OSM) and a VectorLayer for airport markers
+ *  - Converts **airport coordinates** from lon/lat to **map projection** using fromLonLat
+ *  - Styles markers by airport type and shows IATA code labels
+ *  - Emits onBoundsChange(bounds) when the map view changes so the parent can filter the table (pen/zoom)
+ */
 import React, { useEffect, useRef, useState } from 'react';
+
+//all the OpenLayers imports
 import { Map, View } from 'ol';
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 import { OSM, Vector as VectorSource } from 'ol/source';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, transformExtent } from 'ol/proj';
 import { Style, Circle, Fill, Stroke, Text } from 'ol/style';
 import { Overlay } from 'ol';
 import 'ol/ol.css';
 
-import { type Airport } from 'types';
+//our imports
+import { type Airport, type MapBounds } from 'types';
 
+//what needs to be passed in to this componentn
 interface AirportMapProps {
   airports: Airport[];
-  // TODO: Add props for selection and bounds change callbacks
+  // Part A: notify parent when viewport bounds change (so it can filter the table)
+  onBoundsChange?: (bounds: MapBounds) => void;
+  // Future parts (selection sync) can reuse this component API
   // selectedAirport?: Airport | null;
   // onAirportSelect?: (airport: Airport | null) => void;
-  // onBoundsChange?: (bounds: MapBounds) => void;
 }
 
 export const AirportMap: React.FC<AirportMapProps> = ({
-  airports,
+  airports, //destruct
+  onBoundsChange,
 }) => {
+
+  //all our refs
   const mapRef = useRef<HTMLDivElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<Map | null>(null);
@@ -32,6 +50,12 @@ export const AirportMap: React.FC<AirportMapProps> = ({
 
   // Initialize OpenLayers map
   useEffect(() => {
+
+    //note: why all this code in useffect?
+    //let's wait until both dom elements exist.  Good citizens.
+    //also event handlers are side effects. we always put them in useffect.
+    //and every render don't want to recreate the map, handlers, etc. etc.  
+
     if (!mapRef.current || !popupRef.current) return;
 
     // Create vector source for airport markers
@@ -97,6 +121,21 @@ export const AirportMap: React.FC<AirportMapProps> = ({
 
     mapInstanceRef.current = map;
 
+    // Report bounds to parent (initial and on move)
+    const reportBounds = () => {
+      if (!onBoundsChange || !mapInstanceRef.current) return;
+      const m = mapInstanceRef.current;
+      const extent = m.getView().calculateExtent(m.getSize());
+      // Transform from Web Mercator to WGS84 (lon/lat)
+      const [west, south, east, north] = transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
+      onBoundsChange({ west, south, east, north });
+    };
+
+    // Initial bounds
+    reportBounds();
+    // Update on pan/zoom end
+    map.on('moveend', reportBounds);
+
     // TODO: Add selection interaction
     // TODO: Add bounds change handling
 
@@ -129,6 +168,7 @@ export const AirportMap: React.FC<AirportMapProps> = ({
   // TODO: Handle external selection changes
   // TODO: Implement zoom/bounds filtering logic
 
+  //all our useeffects are done.  Now we render the map and popup
   return (
     <div style={{ position: 'relative' }}>
       <div 
@@ -226,6 +266,9 @@ export const AirportMap: React.FC<AirportMapProps> = ({
     </div>
   );
 };
+
+//note: i like to put my helper functiosn at top but eveyrone milease varies (these methods are
+// called in useeffect, AFTER function is rendered.  Normally arrow funnctions to const are not hoisted).
 
 // Helper function to get color by airport type
 const getTypeColor = (type: Airport['type']) => {
