@@ -35,20 +35,21 @@ function DashboardInner() {
         {/* Fixed decorative airplane at bottom-left of the viewport */}
         <div style={{
           position: 'fixed',
-          left: 8,
-          bottom: 8,
-          /* Twice as big as before, with clamps to avoid overflow on very small screens */
-          width: 'min(72vh, 45vw)',
-          height: 'calc(min(72vh, 45vw) * 0.6)',
+          left: 4,
+          bottom: -12, // push slightly below viewport edge for a more grounded feel
+          /* Reduced overall footprint by ~20% */
+          width: 'min(58vh, 36vw)',
+          height: 'calc(min(58vh, 36vw) * 0.6)',
           backgroundImage: `url(${planeImg})`,
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'left bottom',
           backgroundSize: 'contain',
-          opacity: 0.28,
+          opacity: 0.25,
           mixBlendMode: 'multiply',
           filter: 'grayscale(100%) contrast(1.02) brightness(1.02)',
           pointerEvents: 'none',
-          zIndex: 3
+          zIndex: 3,
+          transition: 'opacity 300ms ease'
         }} />
         <div style={{
           position: 'relative',
