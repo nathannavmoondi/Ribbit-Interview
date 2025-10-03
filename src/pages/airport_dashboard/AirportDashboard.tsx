@@ -48,7 +48,7 @@ function DashboardInner() {
           mixBlendMode: 'multiply',
           filter: 'grayscale(100%) contrast(1.02) brightness(1.02)',
           pointerEvents: 'none',
-          zIndex: 3,
+          zIndex: 0, // lower than wrapper (zIndex:1) so map & panel cover it
           transition: 'opacity 300ms ease'
         }} />
         <div style={{
