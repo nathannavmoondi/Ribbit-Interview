@@ -16,12 +16,14 @@ interface AirportListProps {
 //we get passed in visible airports form the dashboard. Which is reclaculated when map bounds change
 export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
   const [hoverId, setHoverId] = useState<string | null>(null);
+
   //grab the selected state and method from context.  auto updated when context changed (and our component rerenders)
   const { selectedAirportId, setSelectedAirportId, updateAirportName } = useSelection();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  //CRUD stuff
   // focus input when entering edit mode
   useEffect(() => {
     if (editingId && inputRef.current) {
@@ -48,7 +50,9 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
   const cancelEdit = () => {
     setEditingId(null);
   };
+
   return (
+    //todo: maybe use fancier grid with sorting, etc. But this is fine for now
     <div style={{ border: '1px solid #2b2b2b', padding: '12px', borderRadius: 6, height: 500, overflow: 'auto', background: 'rgba(0,0,0,0.15)' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
         <thead>
@@ -59,6 +63,7 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
             <th style={th}>Type</th>
             <th style={th}>Elevation (ft)</th>
             <th style={th}>Runways</th>
+            <th style={th}>Starbucks</th>
           </tr>
         </thead>
         <tbody>
@@ -79,10 +84,10 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
                 style={{ ...baseStyle, ...hoverStyle, ...selectedStyle }}
               >
                 <td style={tdCode}>{a.code}</td>
-                <td style={td} onDoubleClick={() => beginEdit(a.id, a.name)}>
+                <td style={td} onDoubleClick={() => beginEdit(a.id, a.name)}>  {/* req's don't say but i assume double click to edit */}
                   {editingId === a.id ? (
                     <input
-                      ref={inputRef}
+                      ref={inputRef} /* so can set focus */
                       value={draftName}
                       onChange={(e) => setDraftName(e.target.value)}
                       onBlur={commitEdit}
@@ -117,6 +122,13 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
                 <td style={tdCap}>{a.type}</td>
                 <td style={tdNum}>{a.elevation.toLocaleString()}</td>
                 <td style={tdNum}>{a.runways}</td>
+                <td style={tdVisited}>
+                  {a.hasStarbucks ? (
+                    <span style={visitedBadgeYes}>Yes</span>
+                  ) : (
+                    <span style={visitedBadgeNo}>No</span>
+                  )}
+                </td>
               </tr>
             );
           })}
@@ -135,5 +147,28 @@ const td: React.CSSProperties = { padding: '10px 8px', borderBottom: '1px solid 
 const tdCap: React.CSSProperties = { ...td, textTransform: 'capitalize' };
 const tdNum: React.CSSProperties = { ...td, textAlign: 'right', fontVariantNumeric: 'tabular-nums' };
 const tdCode: React.CSSProperties = { ...td, fontWeight: 700, fontFamily: 'monospace' };
+const tdVisited: React.CSSProperties = { ...td, textAlign: 'center' };
+
+const visitedBadgeBase: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '2px 8px 3px',
+  borderRadius: 12,
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: 0.5,
+  boxShadow: '0 0 0 1px rgba(255,255,255,0.15), 0 1px 2px rgba(0,0,0,0.4)',
+  userSelect: 'none'
+};
+const visitedBadgeYes: React.CSSProperties = {
+  ...visitedBadgeBase,
+  background: 'linear-gradient(90deg,#32d676,#25b3d6)',
+  color: '#06240f'
+};
+const visitedBadgeNo: React.CSSProperties = {
+  ...visitedBadgeBase,
+  background: 'linear-gradient(90deg,#5a606b,#3a3f47)',
+  color: '#d5d7db',
+  opacity: 0.75
+};
 
 export default AirportList;

@@ -10,7 +10,8 @@ export const mockAirports: Airport[] = [
     coordinates: { latitude: 33.9425, longitude: -118.4081 },
     elevation: 125,
     runways: 4,
-    type: 'international'
+    type: 'international',
+  hasStarbucks: true
   },
   {
     id: '2',
@@ -21,7 +22,8 @@ export const mockAirports: Airport[] = [
     coordinates: { latitude: 37.7749, longitude: -122.4194 },
     elevation: 13,
     runways: 4,
-    type: 'international'
+    type: 'international',
+  hasStarbucks: true
   },
   {
     id: '3',
@@ -32,7 +34,8 @@ export const mockAirports: Airport[] = [
     coordinates: { latitude: 40.6413, longitude: -73.7781 },
     elevation: 13,
     runways: 4,
-    type: 'international'
+    type: 'international',
+  hasStarbucks: true
   },
   {
     id: '4',
@@ -43,7 +46,8 @@ export const mockAirports: Airport[] = [
     coordinates: { latitude: 41.9742, longitude: -87.9073 },
     elevation: 672,
     runways: 7,
-    type: 'international'
+    type: 'international',
+  hasStarbucks: true
   },
   {
     id: '5',
@@ -53,8 +57,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 33.6407, longitude: -84.4277 },
     elevation: 1026,
-    runways: 5,
-    type: 'international'
+  runways: 5,
+  type: 'international',
+  hasStarbucks: false
   },
   {
     id: '6',
@@ -64,8 +69,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 39.8561, longitude: -104.6737 },
     elevation: 5431,
-    runways: 6,
-    type: 'international'
+  runways: 6,
+  type: 'international',
+  hasStarbucks: true
   },
   {
     id: '7',
@@ -75,8 +81,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 47.4502, longitude: -122.3088 },
     elevation: 131,
-    runways: 3,
-    type: 'international'
+  runways: 3,
+  type: 'international',
+  hasStarbucks: true
   },
   {
     id: '8',
@@ -86,8 +93,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 33.4484, longitude: -112.0740 },
     elevation: 1135,
-    runways: 3,
-    type: 'international'
+  runways: 3,
+  type: 'international',
+  hasStarbucks: false
   },
   {
     id: '9',
@@ -97,8 +105,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 25.7617, longitude: -80.1918 },
     elevation: 8,
-    runways: 4,
-    type: 'international'
+  runways: 4,
+  type: 'international',
+  hasStarbucks: false
   },
   {
     id: '10',
@@ -108,8 +117,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 34.2007, longitude: -118.3585 },
     elevation: 778,
-    runways: 2,
-    type: 'domestic'
+  runways: 2,
+  type: 'domestic',
+  hasStarbucks: false
   },
   {
     id: '11',
@@ -119,8 +129,9 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 34.4262, longitude: -119.8403 },
     elevation: 13,
-    runways: 1,
-    type: 'regional'
+  runways: 1,
+  type: 'regional',
+  hasStarbucks: false
   },
   {
     id: '12',
@@ -130,7 +141,8 @@ export const mockAirports: Airport[] = [
     country: 'USA',
     coordinates: { latitude: 34.0158, longitude: -118.4513 },
     elevation: 177,
-    runways: 1,
-    type: 'private'
+  runways: 1,
+  type: 'private',
+  hasStarbucks: false
   }
 ];

@@ -12,8 +12,9 @@ import { AirportMap } from './map/AirportMap';
 import AirportList from './AirportList';
 import { type MapBounds } from 'types';
 import { SelectionProvider, useSelection } from '../../context/SelectionContext';
+import { filterAirportsByBounds } from '../../utils/filterAirports';
 
-// Inner component so we can consume context (airports) while still providing provider at top level
+// Inner component so we can call useSelection and outer gets context provider at top level. Think of it as 2 files.
 function DashboardInner() {
   // In a real app, airports might be fetched. For this exercise we keep them constant
   const { airports } = useSelection();  
@@ -23,24 +24,11 @@ function DashboardInner() {
   // refresher: usememo caches the result of a computation (here, filtering airports)
   // and only recomputes it when its dependencies change (here, airports or bounds).
   // This avoids unnecessary recalculations on every render, improving performance.
-  const visibleAirports = useMemo(() => {
-    if (!bounds) return airports;
-    const { north, south, east, west } = bounds;
-    return airports.filter((a) => {
-      const { latitude: lat, longitude: lon } = a.coordinates;
-      const inLat = lat >= south && lat <= north;
-      // Handle world-wrap: if west <= east normal case, otherwise bounds crosses antimeridian
-      const inLon = west <= east ? (lon >= west && lon <= east) : (lon >= west || lon <= east);
-      return inLat && inLon;
-    });
-  }, [airports, bounds]);
+  const visibleAirports = useMemo(() => filterAirportsByBounds(airports, bounds), [airports, bounds]);
 
-  // Keep the browser tab title in sync with the visible heading
   useEffect(() => {
     document.title = 'Ribbit Dashboard (Nathan Moondi DEMO)';
   }, []);
-
-  // Use branded plane image from assets
 
   return (
       <div style={{ padding: '16px', position: 'relative', zIndex: 1 }}>
@@ -104,3 +92,4 @@ export function AirportDashboard() {
     </SelectionProvider>
   );
 }
+

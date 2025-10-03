@@ -49,6 +49,8 @@ export const AirportMap: React.FC<AirportMapProps> = ({
   const vectorSourceRef = useRef<VectorSource | null>(null);
   const pinSourceRef = useRef<VectorSource | null>(null);
   const overlayRef = useRef<Overlay | null>(null);
+  const lastPointerPixelRef = useRef<number[] | null>(null);
+  const lastPointerCoordinateRef = useRef<any | null>(null);
   
   const [hoveredAirport, setHoveredAirport] = useState<Airport | null>(null);
 
@@ -115,8 +117,33 @@ export const AirportMap: React.FC<AirportMapProps> = ({
 
       if (feature) {
         const airport = feature.get('airport') as Airport;
+        lastPointerPixelRef.current = pixel;
+        lastPointerCoordinateRef.current = evt.coordinate;
         setHoveredAirport(airport);
-        overlay.setPosition(evt.coordinate);
+        // Position overlay now, then lift if necessary using current rendered content frame
+        requestAnimationFrame(() => {
+          if (!overlayRef.current || !mapInstanceRef.current || !popupRef.current) return;
+          const overlay = overlayRef.current;
+          const mapI = mapInstanceRef.current;
+          const popupEl = popupRef.current;
+          overlay.setPosition(evt.coordinate);
+          overlay.setPositioning('bottom-center');
+          overlay.setOffset([0, -18]);
+          const mapEl = mapI.getTargetElement();
+          if (!mapEl) return;
+          const mapHeight = mapEl.clientHeight;
+            const popupHeight = popupEl.offsetHeight || 0;
+          const margin = 10;
+          const spaceBelow = mapHeight - pixel[1];
+          if (spaceBelow < popupHeight + margin) {
+            const liftPx = (popupHeight + margin) - spaceBelow;
+            const adjustedPixel: [number, number] = [pixel[0], pixel[1] - liftPx];
+            const adjustedCoord = mapI.getCoordinateFromPixel(adjustedPixel);
+            if (adjustedCoord) {
+              overlay.setPosition(adjustedCoord);
+            }
+          }
+        });
         map.getTargetElement().style.cursor = 'pointer';
       } else {
         setHoveredAirport(null);
@@ -236,6 +263,8 @@ export const AirportMap: React.FC<AirportMapProps> = ({
       }
     });
   }, [selectedAirportId]);
+
+  // Removed post-render lift effect; handled per pointermove with rAF for immediacy
   // TODO: Implement zoom/bounds filtering logic
 
   //all our useeffects are done.  Now we render the map and popup
@@ -252,83 +281,99 @@ export const AirportMap: React.FC<AirportMapProps> = ({
       />
       
       {/* Hover popup */}
-      <div 
+      <div
         ref={popupRef}
         style={{
           display: hoveredAirport ? 'block' : 'none',
-          backgroundColor: 'white',
-          border: '2px solid #333',
-          borderRadius: '8px',
-          padding: '12px',
-          minWidth: '280px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          fontSize: '14px',
-          fontFamily: 'Arial, sans-serif',
+          background: 'linear-gradient(145deg,#1e2533,#151b26 65%, #10151d)',
+          border: '1px solid rgba(120,160,255,0.35)',
+          borderRadius: 14,
+            padding: '14px 16px 16px',
+          minWidth: 300,
+          boxShadow: '0 8px 24px -4px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05)',
+          fontSize: 13,
+          fontFamily: 'system-ui, Arial, sans-serif',
           zIndex: 1000,
           position: 'absolute',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          color: '#e8edf5',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)'
         }}
       >
         {hoveredAirport && (
           <div>
-            <div style={{ 
-              fontWeight: 'bold', 
-              fontSize: '16px', 
-              marginBottom: '8px',
-              color: '#333',
-              borderBottom: '1px solid #eee',
-              paddingBottom: '4px'
-            }}>
-              {hoveredAirport.code} - {hoveredAirport.name}
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+              <div style={{
+                fontWeight: 600,
+                fontSize: 18,
+                letterSpacing: 0.5,
+                textShadow: '0 1px 2px rgba(0,0,0,0.4)'
+              }}>
+                {hoveredAirport.code}
+              </div>
+              <div style={{
+                fontSize: 13,
+                opacity: 0.85,
+                maxWidth: 180,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
+              }} title={hoveredAirport.name}>
+                {hoveredAirport.name}
+              </div>
+              {hoveredAirport.hasStarbucks && (
+                <span style={{
+                  marginLeft: 'auto',
+                  background: 'linear-gradient(90deg,#32d676,#25b3d6)',
+                  color: '#06240f',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: '3px 6px 2px',
+                  borderRadius: 20,
+                  letterSpacing: 0.5,
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.2),0 2px 4px rgba(0,0,0,0.4)'
+                }}>STARBUCKS</span>
+              )}
             </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-              <div>
-                <strong>City:</strong> {hoveredAirport.city}
-              </div>
-              <div>
-                <strong>Country:</strong> {hoveredAirport.country}
-              </div>
-              
-              <div>
-                <strong>Type:</strong>{' '}
+            <div style={{ height: 1, background: 'linear-gradient(90deg,rgba(255,255,255,0.12),rgba(255,255,255,0.04))', margin: '4px 0 10px' }} />
+
+            {/* Info grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,minmax(0,1fr))', gap: 8, lineHeight: 1.25 }}>
+              <Info label="City" value={hoveredAirport.city} />
+              <Info label="Country" value={hoveredAirport.country} />
+              <Info label="Type" value={
                 <span style={{
                   backgroundColor: getTypeColor(hoveredAirport.type),
-                  color: 'white',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  textTransform: 'capitalize'
-                }}>
-                  {hoveredAirport.type}
-                </span>
-              </div>
-              <div>
-                <strong>Runways:</strong> {hoveredAirport.runways}
-              </div>
-              
-              <div>
-                <strong>Elevation:</strong> {hoveredAirport.elevation.toLocaleString()} ft
-              </div>
-              <div>
-                <strong>ID:</strong> {hoveredAirport.id}
-              </div>
+                  color: '#fff',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  fontSize: 11,
+                  textTransform: 'capitalize',
+                  fontWeight: 600,
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.15)'
+                }}>{hoveredAirport.type}</span>
+              } />
+              <Info label="Runways" value={hoveredAirport.runways} />
+              <Info label="Elevation" value={`${hoveredAirport.elevation.toLocaleString()} ft`} />
+              <Info label="ID" value={hoveredAirport.id} />
+              <Info label="Starbucks" value={hoveredAirport.hasStarbucks ? 'Yes' : 'No'} />
             </div>
-            
-            <div style={{ 
-              marginTop: '8px', 
-              fontSize: '12px', 
-              color: '#666',
-              borderTop: '1px solid #eee',
-              paddingTop: '6px'
+
+            {/* Coordinates footer */}
+            <div style={{
+              marginTop: 12,
+              paddingTop: 10,
+              borderTop: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              fontSize: 11,
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              opacity: 0.9
             }}>
-              <div>
-                <strong>Coordinates:</strong>
-              </div>
-              <div style={{ fontFamily: 'monospace', fontSize: '11px' }}>
-                Lat: {hoveredAirport.coordinates.latitude.toFixed(4)}°<br/>
-                Lon: {hoveredAirport.coordinates.longitude.toFixed(4)}°
-              </div>
+              <div>Lat: {hoveredAirport.coordinates.latitude.toFixed(4)}°</div>
+              <div>Lon: {hoveredAirport.coordinates.longitude.toFixed(4)}°</div>
             </div>
           </div>
         )}
@@ -339,6 +384,14 @@ export const AirportMap: React.FC<AirportMapProps> = ({
 
 //note: i like to put my helper functiosn at top but eveyrone milease varies (these methods are
 // called in useeffect, AFTER function is rendered.  Normally arrow funnctions to const are not hoisted).
+
+// Small presentational component for popup key/value lines
+const Info: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.8, opacity: 0.55 }}>{label}</span>
+    <span style={{ fontWeight: 500 }}>{value}</span>
+  </div>
+);
 
 // Helper function to get color by airport type
 const getTypeColor = (type: Airport['type']) => {
