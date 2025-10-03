@@ -5,7 +5,7 @@
  *  - Receives airports as props and renders a scrollable table with sticky header
  *  - Designed to be fed by the dashboard's filtered (visible) airports
  */
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { type Airport } from 'types';
 import { useSelection } from '../../context/SelectionContext';
 
@@ -17,7 +17,37 @@ interface AirportListProps {
 export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
   const [hoverId, setHoverId] = useState<string | null>(null);
   //grab the selected state and method from context.  auto updated when context changed (and our component rerenders)
-  const { selectedAirportId, setSelectedAirportId } = useSelection();
+  const { selectedAirportId, setSelectedAirportId, updateAirportName } = useSelection();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draftName, setDraftName] = useState('');
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // focus input when entering edit mode
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
+
+  const beginEdit = (airportId: string, currentName: string) => {
+    setEditingId(airportId);
+    setDraftName(currentName);
+  };
+
+  const commitEdit = () => {
+    if (editingId) {
+      const trimmed = draftName.trim();
+      if (trimmed.length > 0) {
+        updateAirportName(editingId, trimmed);
+      }
+    }
+    setEditingId(null);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+  };
   return (
     <div style={{ border: '1px solid #2b2b2b', padding: '12px', borderRadius: 6, height: 500, overflow: 'auto', background: 'rgba(0,0,0,0.15)' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
@@ -49,7 +79,40 @@ export const AirportList: React.FC<AirportListProps> = ({ airports }) => {
                 style={{ ...baseStyle, ...hoverStyle, ...selectedStyle }}
               >
                 <td style={tdCode}>{a.code}</td>
-                <td style={td}>{a.name}</td>
+                <td style={td} onDoubleClick={() => beginEdit(a.id, a.name)}>
+                  {editingId === a.id ? (
+                    <input
+                      ref={inputRef}
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      onBlur={commitEdit}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') commitEdit();
+                        else if (e.key === 'Escape') cancelEdit();
+                      }}
+                      style={{
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        fontSize: 'inherit',
+                        fontFamily: 'inherit',
+                        padding: '4px 6px',
+                        border: '1px solid #4d5b7c',
+                        borderRadius: 4,
+                        background: '#0f1117',
+                        color: '#fff'
+                      }}
+                    />
+                  ) : (
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setSelectedAirportId(a.id); }}
+                      onDoubleClick={(e) => { e.stopPropagation(); beginEdit(a.id, a.name); }}
+                      title="Double-click to edit name"
+                      style={{ display: 'inline-block', maxWidth: '100%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    >
+                      {a.name}
+                    </span>
+                  )}
+                </td>
                 <td style={td}>{a.city}</td>
                 <td style={tdCap}>{a.type}</td>
                 <td style={tdNum}>{a.elevation.toLocaleString()}</td>

@@ -10,13 +10,13 @@ import { useEffect, useMemo, useState } from 'react';
 import planeImg from 'assets/plane.png';
 import { AirportMap } from './map/AirportMap';
 import AirportList from './AirportList';
-import { mockAirports } from 'data/MockAirports';
-import { type MapBounds, type Airport } from 'types';
-import { SelectionProvider } from '../../context/SelectionContext';
+import { type MapBounds } from 'types';
+import { SelectionProvider, useSelection } from '../../context/SelectionContext';
 
-export function AirportDashboard() {
+// Inner component so we can consume context (airports) while still providing provider at top level
+function DashboardInner() {
   // In a real app, airports might be fetched. For this exercise we keep them constant
-  const [airports] = useState<Airport[]>(mockAirports);
+  const { airports } = useSelection();  
   const [bounds, setBounds] = useState<MapBounds | null>(null);
 
   // Compute airports within current map bounds
@@ -43,7 +43,6 @@ export function AirportDashboard() {
   // Use branded plane image from assets
 
   return (
-    <SelectionProvider>
       <div style={{ padding: '16px', position: 'relative', zIndex: 1 }}>
         {/* Fixed decorative airplane at bottom-left of the viewport */}
         <div style={{
@@ -95,6 +94,13 @@ export function AirportDashboard() {
           </div>
         </div>
       </div>
+  );
+}
+
+export function AirportDashboard() {
+  return (
+    <SelectionProvider>
+      <DashboardInner />
     </SelectionProvider>
   );
 }

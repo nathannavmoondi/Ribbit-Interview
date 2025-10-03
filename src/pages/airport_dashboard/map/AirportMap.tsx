@@ -166,7 +166,7 @@ export const AirportMap: React.FC<AirportMapProps> = ({
     };
   }, []);
 
-  // Update airport markers when airports change
+  // Update airport markers when airports change (also fires when a name edit causes new array reference in context)
   useEffect(() => {
     if (!vectorSourceRef.current) return;
 
