@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "tsc -b && vite build",
+    "build": "cross-env ROLLUP_DISABLE_NATIVE=1 NODE_OPTIONS=--max_old_space_size=4096 tsc -b && cross-env ROLLUP_DISABLE_NATIVE=1 vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "jest"
@@ -39,6 +39,7 @@
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jest-junit": "^16.0.0",
+  "cross-env": "^7.0.3",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
