@@ -16,6 +16,7 @@ export default defineConfig({
       'types': path.resolve(__dirname, 'src/types'),
       'assets': path.resolve(__dirname, 'src/assets'),
       'data': path.resolve(__dirname, 'src/data'),
+  'context': path.resolve(__dirname, 'src/context'),
       // Add other top-level directories in src as needed
     },
   }
