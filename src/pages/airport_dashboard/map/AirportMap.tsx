@@ -24,16 +24,13 @@ import 'ol/ol.css';
 
 //our imports
 import { type Airport, type MapBounds } from 'types';
-import { useSelection } from '../../../context/SelectionContext';
+import { useSelection } from 'context/SelectionContext';
 
 //what needs to be passed in to this componentn
 interface AirportMapProps {
   airports: Airport[];
   // Part A: notify parent when viewport bounds change (so it can filter the table)
-  onBoundsChange?: (bounds: MapBounds) => void;
-  // Future parts (selection sync) can reuse this component API
-  // selectedAirport?: Airport | null;
-  // onAirportSelect?: (airport: Airport | null) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;  
 }
 
 export const AirportMap: React.FC<AirportMapProps> = ({

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="React tests" tests="3" failures="0" errors="0" time="5.115">
-  <testsuite name="filterAirportsByBounds" errors="0" failures="0" skipped="0" timestamp="2025-10-03T22:06:26" time="2.326" tests="3">
-    <testcase classname="filterAirportsByBounds" name="returns all when no bounds" time="0.004" file="src\pages\airport_dashboard\__tests__\filterAirports.test.ts">
+<testsuites name="React tests" tests="3" failures="0" errors="0" time="7.478">
+  <testsuite name="filterAirportsByBounds" errors="0" failures="0" skipped="0" timestamp="2025-10-05T22:04:54" time="2.943" tests="3">
+    <testcase classname="filterAirportsByBounds" name="returns all when no bounds" time="0.005" file="src\pages\airport_dashboard\__tests__\filterAirports.test.ts">
     </testcase>
     <testcase classname="filterAirportsByBounds" name="filters by simple bounds" time="0.002" file="src\pages\airport_dashboard\__tests__\filterAirports.test.ts">
     </testcase>
